@@ -2,25 +2,26 @@ version: "3.9"
 
 services:
   mongodb:
-    image: mongodb/mongodb-community-server:5.0-ubuntu2004
+    image: mongo:8
     container_name: mongodb
     restart: always
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME: admin
+      - MONGO_INITDB_ROOT_PASSWORD: Mongo_Pass@!
     volumes:
-      - mongodb_data:/var/lib/mongodb
+      - mongo_data:/data/db
     networks:
       - smart-network
 
   auth-service:
     build: ./auth-service_1784011000189
     container_name: auth-service
-    ports: 
-      - "5001:5001"
     environment:
       - PORT=5001
-      - MONGO_URI=mongodb://mongodb:27017/auth_db
-      - JWT_SECRET=DB_secret
+      - MONGO_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/authdb?authSource=admin
+      - JWT_SECRET=MySecret@123
     depends_on:
       - mongodb
     networks:
@@ -29,12 +30,10 @@ services:
   task-service:
     build: ./task-service
     container_name: task-service
-    ports: 
-      - "5002:5002"
     environment:
       - PORT=5002
-      - MONGO_URI=mongodb://mongodb:27017/task_db
-      - JWT_SECRET=DB_secret
+      - MONGO_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/taskdb?authSource=admin
+      - JWT_SECRET=MySecret@123
     depends_on:
       - mongodb
     networks:
@@ -43,13 +42,11 @@ services:
   notification-service:
     build: ./notification-service
     container_name: notification-service
-    ports:
-      - "5003:5003"
     environment:
       - PORT=5003
-      - MONGO_URI=mongodb://mongodb:27017/notification_db
-      - JWT_SECRET=DB_secret
-    depends_on: 
+      - MONGO_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/notificationdb?authSource=admin
+      - JWT_SECRET=MySecret@123
+    depends_on:
       - mongodb
     networks:
       - smart-network
@@ -57,12 +54,10 @@ services:
   report-service:
     build: ./report-service
     container_name: report-service
-    ports: 
-      - "5004:5004"
     environment:
       - PORT=5004
-      - MONGO_URI=mongodb://mongodb:27017/report_db
-      - JWT_SECRET=DB_secret
+      - MONGO_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/reportdb?authSource=admin
+      - JWT_SECRET=MySecret@123
     depends_on:
       - mongodb
     networks:
@@ -71,32 +66,28 @@ services:
   api-gateway:
     build: ./api-gateway_1784010924579
     container_name: api-gateway
-    ports: 
+    ports:
       - "5000:5000"
     environment:
       - PORT=5000
       - AUTH_SERVICE_URL=http://auth-service:5001
       - TASK_SERVICE_URL=http://task-service:5002
-      - JWT_SECRET=DB_secret
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5003
+      - REPORT_SERVICE_URL=http://report-service:5004
+      - JWT_SECRET=MySecret@123
     depends_on:
       - auth-service
       - task-service
-    networks:
-      - smart-network
-  
-  frontend:
-    build: ./frontend
-    container_name: fronetend-app
-    ports:
-      - "80:80"
-    depends_on:
-      - api-gateway
+      - notification-service
+      - report-service
     networks:
       - smart-network
 
 volumes:
-  mongodb_data:
+  mongo_data:
 
 networks:
   smart-network:
     driver: bridge
+
+
