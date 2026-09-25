@@ -12,7 +12,7 @@ pipeline {
         S3_BUCKET = 'sat-react-app-bucket'
         CLOUDFRONT_DISTRIBUTION_ID = 'E1CS5A31ZQEM6U'
 
-        EC2_HOST = '65.1.100.195'
+        EC2_HOST = '13.204.68.109'
         EC2_USER = 'ubuntu'
         EC2_PROJECT_DIR = '/home/ubuntu/Smart-Task-Management-System'
     }
