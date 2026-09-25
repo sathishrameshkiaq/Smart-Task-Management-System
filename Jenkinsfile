@@ -84,7 +84,7 @@ pipeline {
                     sh '''
                         aws s3 sync \
                             frontend/dist/ \
-                            s3://${S3_BUCKET}/ \
+                            s3://${S3_BUCKET}/dist/ \
                             --delete
                     '''
                 }
